@@ -8,7 +8,7 @@
 #### Tutorial for Andante:
 > click on the top left, on the instrument emoji '🎸/🎻/🎷' (whatever instrument your playing) &rarr; next to your instrument are three dots (···) &rarr; `Export practice data` &rarr; select your device 
 
-&rarr; then save your *.csv in the same folder as the index.html and youre good to go. 
+&rarr; then save your *.csv in the same folder as the index.html and your good to go. 
 
 #### How to upload the repo on GitHub Pages?
 > Go to your Repo &rarr; Settings &rarr; Pages &rarr; ``Build and deployment (select your branch) &rarr; go to 'Actions', to see the build progress &rarr; save the link and post it/do whatever you want to do withit
