@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stats · Guitar &amp; Bass</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #111113;
+      color: #ffffff;
+      min-height: 100vh;
+      padding: 0 0 4rem;
+    }
+
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.4rem 1.25rem 1rem;
+      max-width: 480px; margin: 0 auto;
+    }
+    .topbar-icon {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: #2a2a2e;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .topbar-title { font-size: 17px; font-weight: 600; }
+    .streak-badge { display: flex; align-items: center; gap: 5px; font-size: 16px; font-weight: 600; }
+
+    .wrap { max-width: 480px; margin: 0 auto; padding: 0 1rem; display: flex; flex-direction: column; gap: 14px; }
+
+    .card { background: #1c1c1f; border-radius: 20px; padding: 20px; overflow: hidden; }
+    .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .card-icon {
+      width: 40px; height: 40px; border-radius: 11px;
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .card-icon.orange { background: #e8623a; }
+    .card-icon.blue   { background: #3a8ee8; }
+    .card-icon.gray   { background: #3a3a3e; font-size: 16px; }
+    .card-title { font-size: 17px; font-weight: 600; }
+    .card-title-row { display: flex; align-items: center; justify-content: space-between; flex: 1; }
+    .period-btn {
+      font-size: 13px; color: #8e8e93;
+      background: none; border: none; cursor: pointer;
+      font-family: inherit;
+    }
+
+    .hm-months-row { display: flex; padding-right: 38px; margin-bottom: 5px; }
+    .hm-month-lbl { font-size: 12px; color: #8e8e93; font-weight: 500; }
+    .hm-body { display: flex; gap: 0; }
+    .hm-cols { display: flex; gap: 3px; flex: 1; }
+    .hm-col  { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+    .hm-cell {
+      width: 100%; aspect-ratio: 1; border-radius: 4px;
+      background: #2a2a2e; cursor: default;
+      transition: transform 0.12s;
+    }
+    .hm-cell:hover { transform: scale(1.35); z-index: 2; position: relative; }
+    .hm-cell.l1 { background: #6b2a1a; }
+    .hm-cell.l2 { background: #c94a28; }
+    .hm-cell.l3 { background: #ff9980; }
+    .hm-day-labels {
+      display: flex; flex-direction: column; gap: 3px;
+      width: 34px; flex-shrink: 0; padding-left: 6px;
+    }
+    .hm-day { font-size: 11px; color: #8e8e93; display: flex; align-items: center; flex: 1; }
+
+    .bar-area { position: relative; margin-bottom: 2px; }
+    .bar-grid-line {
+      position: absolute; left: 0; right: 0;
+      border-top: 1px solid #2a2a2e;
+    }
+    .bar-grid-label { font-size: 11px; color: #8e8e93; margin-top: -8px; padding-left: 0; min-width: 30px; display: inline-block; }
+    .bar-chart {
+      display: flex; align-items: flex-end; gap: 6px;
+      padding-left: 38px; height: 150px; position: relative; z-index: 1;
+    }
+    .bar-col  { flex: 1; display: flex; align-items: flex-end; height: 100%; }
+    .bar-fill { width: 100%; border-radius: 6px 6px 0 0; background: #5aacf5; }
+    .bar-xlabels { display: flex; gap: 6px; padding-left: 38px; margin-top: 8px; }
+    .bar-xlabel  { flex: 1; text-align: center; font-size: 12px; color: #8e8e93; }
+
+    .summary { display: flex; justify-content: space-between; margin-top: 20px; }
+    .summary-val   { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
+    .summary-label { font-size: 13px; color: #8e8e93; margin-top: 2px; }
+    .summary-right { text-align: right; }
+
+    .mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .mini-card { background: #1c1c1f; border-radius: 16px; padding: 16px; }
+    .mini-label { font-size: 12px; color: #8e8e93; margin-bottom: 6px; }
+    .mini-val   { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+    .mini-unit  { font-size: 13px; color: #8e8e93; font-weight: 400; margin-left: 2px; }
+
+    .session-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid #2a2a2e;
+    }
+    .session-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .session-row:first-child { padding-top: 0; }
+    .session-name { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+    .session-meta { font-size: 12px; color: #8e8e93; }
+    .session-dur  { font-size: 17px; font-weight: 600; }
+    .session-dur-unit { font-size: 12px; color: #8e8e93; }
+    .mood-dots { display: flex; gap: 4px; margin-top: 5px; justify-content: flex-end; }
+    .mood-dot  { width: 6px; height: 6px; border-radius: 50%; background: #2a2a2e; }
+    .mood-dot.on { background: #e8623a; }
+
+    #tooltip {
+      position: fixed; background: #2c2c2f; color: #fff;
+      font-size: 11px; padding: 5px 10px; border-radius: 8px;
+      pointer-events: none; display: none; z-index: 999; white-space: nowrap;
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-icon">🎸</div>
+  <span class="topbar-title">Stats (Andante App Data)</span>
+  <div class="streak-badge">🦖<span id="streak-num">1</span></div>
+</div>
+
+<div class="wrap">
+
+  <!-- Profile -->
+  <div class="card" style="display:flex; align-items:center; gap:16px; padding:16px 20px;">
+    <img src="cat.jpg" 
+         style="width:58px; height:58px; border-radius:50%; object-fit:cover; flex-shrink:0;" alt="Finn" />
+    <div style="flex:1; min-width:0;">
+      <div style="font-size:17px; font-weight:600; margin-bottom:3px;">Finn</div>
+      <div style="font-size:12px; color:#8e8e93; margin-bottom:8px;">Bass · Guitar</div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <span style="font-size:11px; background:#2a2a2e; color:#8e8e93; padding:3px 9px; border-radius:20px;">🎸 Guitar</span>
+        <span style="font-size:11px; background:#2a2a2e; color:#8e8e93; padding:3px 9px; border-radius:20px;">🎸 Bass</span>
+        <span style="font-size:11px; background:rgba(232,98,58,0.15); color:#e8623a; padding:3px 9px; border-radius:20px;">Beginner</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon orange">📅</div>
+      <span class="card-title">Activity</span>
+    </div>
+    <div class="hm-months-row" id="hm-months"></div>
+    <div class="hm-body">
+      <div class="hm-cols" id="hm-cols"></div>
+      <div class="hm-day-labels">
+        <div class="hm-day">Mon</div>
+        <div class="hm-day">Tue</div>
+        <div class="hm-day">Wed</div>
+        <div class="hm-day">Thu</div>
+        <div class="hm-day">Fri</div>
+        <div class="hm-day">Sat</div>
+        <div class="hm-day">Sun</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Practice Time -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">⏱</div>
+      <div class="card-title-row">
+        <span class="card-title">Practice Time</span>
+        <button class="period-btn" id="period-btn">Last 7 Days ▾</button>
+      </div>
+    </div>
+    <div class="bar-area" id="bar-area">
+      <div class="bar-chart" id="barchart"></div>
+    </div>
+    <div class="bar-xlabels" id="bar-xlabels"></div>
+    <div class="summary">
+      <div>
+        <div class="summary-val" id="total-val">—</div>
+        <div class="summary-label">Total practiced</div>
+      </div>
+      <div class="summary-right">
+        <div class="summary-val" id="avg-val">—</div>
+        <div class="summary-label">Daily average</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mini metrics -->
+  <div class="mini-grid">
+    <div class="mini-card"><div class="mini-label">Sessions</div><div class="mini-val" id="m-sessions">—</div></div>
+    <div class="mini-card"><div class="mini-label">Avg mood</div><div class="mini-val" id="m-mood">—</div></div>
+    <div class="mini-card"><div class="mini-label">Avg session</div><div class="mini-val" id="m-avg">—</div></div>
+    <div class="mini-card"><div class="mini-label">Avg focus</div><div class="mini-val" id="m-focus">—</div></div>
+  </div>
+
+  <!-- Sessions -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon gray">📝</div>
+      <span class="card-title">Sessions</span>
+    </div>
+    <div id="sessions-list"></div>
+  </div>
+
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+  const sessions = [
+    { title: "Bass & Guitar",                  duration: 26, start: "2026-05-01 12:09", mood: 3, focus: 3 },
+    { title: "Scale practice (guitar & bass)", duration: 30, start: "2026-04-29 16:43", mood: 4, focus: 3 },
+  ];
+
+  const parseDate = s => new Date(s.replace(' ', 'T'));
+  const isoKey    = d => d.toISOString().slice(0, 10);
+  const fmtMin    = m => m >= 60
+    ? Math.floor(m / 60) + 'h' + (m % 60 ? ' ' + (m % 60) + 'm' : '')
+    : m + 'm';
+  const fmtDate   = d =>
+    d.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' }) +
+    ' · ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+
+  const today  = new Date('2026-05-01');
+  const dayMap = {};
+  sessions.forEach(s => {
+    const k = isoKey(parseDate(s.start));
+    dayMap[k] = (dayMap[k] || 0) + s.duration;
+  });
+
+  let streak = 0;
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today); d.setDate(today.getDate() - i);
+    if (dayMap[isoKey(d)]) streak++;
+    else if (i > 0) break;
+  }
+  document.getElementById('streak-num').textContent = streak;
+
+  const WEEKS     = 12;
+  const hmCols    = document.getElementById('hm-cols');
+  const hmMonths  = document.getElementById('hm-months');
+  const tooltip   = document.getElementById('tooltip');
+
+  const todayDow  = today.getDay();
+  const latestMon = new Date(today);
+  latestMon.setDate(today.getDate() - ((todayDow + 6) % 7));
+
+  const monthsSeen = {}, monthPos = [];
+  for (let w = WEEKS - 1; w >= 0; w--) {
+    const d = new Date(latestMon);
+    d.setDate(latestMon.getDate() - w * 7);
+    const key = d.getFullYear() + '-' + d.getMonth();
+    if (!monthsSeen[key]) {
+      monthsSeen[key] = true;
+      monthPos.push({ label: d.toLocaleString('en', { month: 'short' }), col: WEEKS - 1 - w });
+    }
+  }
+  let lastCol = 0;
+  monthPos.forEach((mp, i) => {
+    if (i > 0) {
+      const sp = document.createElement('div');
+      sp.style.flex = mp.col - lastCol;
+      hmMonths.appendChild(sp);
+    } else {
+      const sp = document.createElement('div');
+      sp.style.flex = mp.col || '0 0 0px';
+      hmMonths.appendChild(sp);
+    }
+    const lbl = document.createElement('div');
+    lbl.className = 'hm-month-lbl';
+    lbl.textContent = mp.label;
+    hmMonths.appendChild(lbl);
+    lastCol = mp.col + 1;
+  });
+  const tail = document.createElement('div');
+  tail.style.flex = WEEKS - lastCol;
+  hmMonths.appendChild(tail);
+
+  for (let w = WEEKS - 1; w >= 0; w--) {
+    const col = document.createElement('div');
+    col.className = 'hm-col';
+    for (let day = 0; day < 7; day++) {
+      const d   = new Date(latestMon);
+      d.setDate(latestMon.getDate() - w * 7 + day);
+      const k   = isoKey(d);
+      const min = dayMap[k] || 0;
+      let lvl = '';
+      if (min >= 1  && min < 10)  lvl = 'l1';
+      else if (min >= 10 && min <= 30) lvl = 'l2';
+      else if (min > 30)              lvl = 'l3';
+      const cell = document.createElement('div');
+      cell.className = 'hm-cell ' + lvl;
+      cell.addEventListener('mousemove', e => {
+        tooltip.style.display = 'block';
+        tooltip.style.left = (e.clientX + 12) + 'px';
+        tooltip.style.top  = (e.clientY - 32) + 'px';
+        tooltip.textContent = k + (min ? ': ' + min + 'm' : ': no session');
+      });
+      cell.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+      col.appendChild(cell);
+    }
+    hmCols.appendChild(col);
+  }
+
+  const DAY_LBL = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const days7   = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today); d.setDate(today.getDate() - i);
+    days7.push({ k: isoKey(d), min: dayMap[isoKey(d)] || 0, label: DAY_LBL[d.getDay()] });
+  }
+  const maxMin  = Math.max(...days7.map(d => d.min), 30);
+  const CHART_H = 150;
+  const barArea = document.getElementById('bar-area');
+
+  [0, Math.round(maxMin / 2), maxMin].forEach(v => {
+    const line = document.createElement('div');
+    line.className = 'bar-grid-line';
+    line.style.bottom = (v / maxMin * CHART_H) + 'px';
+    line.innerHTML = `<span class="bar-grid-label">${fmtMin(v)}</span>`;
+    barArea.appendChild(line);
+  });
+
+  const barEl  = document.getElementById('barchart');
+  const xlbls  = document.getElementById('bar-xlabels');
+  days7.forEach(d => {
+    const h   = d.min ? Math.max(d.min / maxMin * CHART_H, 4) : 0;
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+    col.innerHTML = `<div class="bar-fill" style="height:${h}px;opacity:${d.min?1:0.15};"></div>`;
+    barEl.appendChild(col);
+    const lbl = document.createElement('div');
+    lbl.className = 'bar-xlabel';
+    lbl.textContent = d.label;
+    xlbls.appendChild(lbl);
+  });
+
+  const total7    = days7.reduce((a, d) => a + d.min, 0);
+  const pracDays7 = days7.filter(d => d.min > 0).length;
+  document.getElementById('total-val').textContent = fmtMin(total7);
+  document.getElementById('avg-val').textContent   = fmtMin(pracDays7 ? Math.round(total7 / pracDays7) : 0);
+
+  const periods = ['Last 7 Days', 'Last 30 Days', 'All Time'];
+  let pIdx = 0;
+  document.getElementById('period-btn').addEventListener('click', () => {
+    pIdx = (pIdx + 1) % periods.length;
+    document.getElementById('period-btn').textContent = periods[pIdx] + ' ▾';
+  });
+
+  const allMin  = sessions.reduce((a, s) => a + s.duration, 0);
+  const avgMood = (sessions.reduce((a, s) => a + s.mood,  0) / sessions.length).toFixed(1);
+  const avgFoc  = (sessions.reduce((a, s) => a + s.focus, 0) / sessions.length).toFixed(1);
+  document.getElementById('m-sessions').textContent = sessions.length;
+  document.getElementById('m-mood').innerHTML    = avgMood + '<span class="mini-unit">/ 5</span>';
+  document.getElementById('m-avg').innerHTML     = Math.round(allMin / sessions.length) + '<span class="mini-unit">min</span>';
+  document.getElementById('m-focus').innerHTML   = avgFoc  + '<span class="mini-unit">/ 5</span>';
+
+  const sessEl = document.getElementById('sessions-list');
+  sessions.slice().reverse().forEach(s => {
+    const d    = parseDate(s.start);
+    const dots = Array.from({ length: 5 }, (_, i) =>
+      `<div class="mood-dot ${i < s.mood ? 'on' : ''}"></div>`
+    ).join('');
+    const row = document.createElement('div');
+    row.className = 'session-row';
+    row.innerHTML = `
+      <div>
+        <div class="session-name">${s.title}</div>
+        <div class="session-meta">${fmtDate(d)}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="session-dur">${s.duration}<span class="session-dur-unit">m</span></div>
+        <div class="mood-dots">${dots}</div>
+      </div>`;
+    sessEl.appendChild(row);
+  });
+</script>
+</body>
+</html>
