@@ -11,7 +11,7 @@
 &rarr; then save your *.csv in the same folder as the index.html and your good to go. 
 
 #### How to upload the repo on GitHub Pages?
-> Go to your Repo &rarr; Settings &rarr; Pages &rarr; ``Build and deployment (select your branch) &rarr; go to 'Actions', to see the build progress &rarr; save the link and post it/do whatever you want to do withit
+> Go to your Repo &rarr; Settings &rarr; Pages &rarr; `Build and deployment`(select your branch) &rarr; go to 'Actions', to see the build progress &rarr; save the link and post it/do whatever you want to do withit
 
 - if you want to change your profile, its hardcoded so feel free to change my name and the picture :)
 
